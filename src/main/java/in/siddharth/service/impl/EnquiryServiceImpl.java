@@ -3,7 +3,6 @@ package in.siddharth.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -34,19 +33,29 @@ public class EnquiryServiceImpl implements EnquiryService {
 	@Override
 	public boolean addEnquiry(EnquiryDto enquiryDto, Integer counsellorId) {
 
-		Counsellor counsellor = counsellorRepo.findById(counsellorId).orElseThrow();
-		Course course = courseRepo.findById(enquiryDto.getCourseId()).orElseThrow();
+	    // If ID is present, update existing enquiry
+	    if (enquiryDto.getEnqId() != null) {
+	        return updateEnquiry(enquiryDto);
+	    }
 
-		Enquiry entity = new Enquiry();
+	    Counsellor counsellor = counsellorRepo.findById(counsellorId).orElseThrow();
+	    Course course = courseRepo.findById(enquiryDto.getCourseId()).orElseThrow();
 
-		BeanUtils.copyProperties(enquiryDto, entity);
-		entity.setCourse(course);
-		entity.setCounsellor(counsellor);
+	    Enquiry entity = new Enquiry();
 
-		Enquiry savedEnq = enquiryRepo.save(entity);
+	    entity.setStudName(enquiryDto.getStudName());
+	    entity.setStudPhno(enquiryDto.getStudPhno());
+	    entity.setClassMode(enquiryDto.getClassMode());
+	    entity.setEnqStatus(enquiryDto.getEnqStatus());
 
-		return savedEnq.getEnqId() != null;
+	    entity.setCourse(course);
+	    entity.setCounsellor(counsellor);
+
+	    Enquiry savedEnq = enquiryRepo.save(entity);
+
+	    return savedEnq.getEnqId() != null;
 	}
+	
 
 	@Override
 	public List<Enquiry> getAllEnquiry(Integer counsellorId) {
@@ -84,17 +93,27 @@ public class EnquiryServiceImpl implements EnquiryService {
 
 	@Override
 	public boolean updateEnquiry(EnquiryDto enquiryDto) {
-		Optional<Enquiry> byId = enquiryRepo.findById(enquiryDto.getEnqId());
 
-		if (byId.isPresent()) {
-			Enquiry enquiry = byId.get();
-			enquiry.setStudName(enquiryDto.getStuName());
-			enquiry.setStudPhno(enquiryDto.getStuPhno());
-			enquiry.setEnqStatus(enquiryDto.getEnqStatus());
-			enquiryRepo.save(enquiry);
-			return true;
-		}
-		return false;
+	    Optional<Enquiry> byId = enquiryRepo.findById(enquiryDto.getEnqId());
+
+	    if (byId.isPresent()) {
+
+	        Enquiry enquiry = byId.get();
+
+	        enquiry.setStudName(enquiryDto.getStudName());
+	        enquiry.setStudPhno(enquiryDto.getStudPhno());
+	        enquiry.setClassMode(enquiryDto.getClassMode());
+	        enquiry.setEnqStatus(enquiryDto.getEnqStatus());
+
+	        Course course = courseRepo.findById(enquiryDto.getCourseId()).orElseThrow();
+	        enquiry.setCourse(course);
+
+	        enquiryRepo.save(enquiry);
+
+	        return true;
+	    }
+
+	    return false;
 	}
 
 }

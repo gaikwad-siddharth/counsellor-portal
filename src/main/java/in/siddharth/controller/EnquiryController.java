@@ -2,7 +2,6 @@ package in.siddharth.controller;
 
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -74,32 +73,42 @@ public class EnquiryController {
 		return "view-enqs";
 	}
 	
-	@PostMapping("/filter-enquiries")	
-	public String viewEnquires(EnqFilterRequestDto filterRequestDto, Model model, HttpServletRequest request) {
-		
-		HttpSession session = request.getSession(false);
-		Integer cid = (Integer) session.getAttribute("CID");
-		
-		List<Enquiry> enquiryWithFilter = enqService.getEnquiryWithFilter(filterRequestDto, cid);
-		
-		model.addAttribute("enqs", enquiryWithFilter);
-		model.addAttribute("courses", courseService.getCourse());
-		
-		return "view-enqs";
+	@PostMapping("/filter-enquiries")
+	public String viewEnquires(EnqFilterRequestDto filterRequestDto,
+	                           Model model,
+	                           HttpServletRequest request) {
+
+	    HttpSession session = request.getSession(false);
+	    Integer cid = (Integer) session.getAttribute("CID");
+
+	    List<Enquiry> enquiryWithFilter =
+	            enqService.getEnquiryWithFilter(filterRequestDto, cid);
+
+	    model.addAttribute("filerRequestDto", filterRequestDto);   // add this
+	    model.addAttribute("enqs", enquiryWithFilter);
+	    model.addAttribute("courses", courseService.getCourse());
+
+	    return "view-enqs";
 	}
 	
 	@GetMapping("/editEnq")
 	public String editEnquiry(@RequestParam("enqId") Integer enqId, Model model) {
-		Enquiry enquiryById = enqService.getEnquiryById(enqId);
-		
-		EnquiryDto dto= new EnquiryDto();
-		BeanUtils.copyProperties(enquiryById, dto);
-		dto.setCourseId(enquiryById.getCourse().getCourseId());
-		
-		model.addAttribute("enqDto", dto);		
-		model.addAttribute("courses", courseService.getCourse());
-		
-		return "add-enq";
+
+	    Enquiry enquiryById = enqService.getEnquiryById(enqId);
+
+	    EnquiryDto dto = new EnquiryDto();
+
+	    dto.setEnqId(enquiryById.getEnqId());
+	    dto.setStudName(enquiryById.getStudName());
+	    dto.setStudPhno(enquiryById.getStudPhno());
+	    dto.setClassMode(enquiryById.getClassMode());
+	    dto.setEnqStatus(enquiryById.getEnqStatus());
+	    dto.setCourseId(enquiryById.getCourse().getCourseId());
+
+	    model.addAttribute("enquiry", dto);
+	    model.addAttribute("courses", courseService.getCourse());
+
+	    return "add-enq";
 	}
 
 }

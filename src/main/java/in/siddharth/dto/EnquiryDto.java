@@ -8,8 +8,8 @@ import lombok.Setter;
 public class EnquiryDto {
 	
 	private Integer enqId;
-	private String stuName;
-	private String stuPhno;
+	private String studName;
+	private String studPhno;
 	private String classMode;
 	private String enqStatus;
 	private Integer courseId;
